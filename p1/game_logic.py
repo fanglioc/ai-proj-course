@@ -1,115 +1,80 @@
 import pygame
-import config
+from config import *
 
 # Initialize pygame
 pygame.init()
 
-# Set the screen dimensions
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+# Define the font
+font = pygame.font.SysFont(FONT, FONT_SIZE)
 
-# Set the title of the game window
-pygame.display.set_caption("Agent Game")
 
-# Set the clock
-clock = pygame.time.Clock()
+class Game:
+    def __init__(self):
+        # Set up the screen
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        pygame.display.set_caption("My Game")
 
-# Define the font for the win message
-font = pygame.font.Font(None, 80)
+        # Define the agent starting position
+        self.agent_pos = AGENT_POS
 
-# Define a function to check for collisions
-def check_collisions(rect1, rect2):
-    if (rect1[0] < rect2[0] + rect2[2] and
-        rect1[0] + rect1[2] > rect2[0] and
-        rect1[1] < rect2[1] + rect2[3] and
-        rect1[1] + rect1[3] > rect2[1]):
-        return True
-    else:
-        return False
+        # Define the game loop
+        self.running = True
 
-# Draw the walls on the screen
-def draw_walls():
-    for wall in config.WALL_LIST:
-        pygame.draw.rect(screen, config.WHITE, wall)
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+                elif event.key == pygame.K_UP:
+                    new_pos = (self.agent_pos[0], self.agent_pos[1] - 1)
+                    if new_pos[1] >= 0 and not maze[new_pos[1]][new_pos[0]]:
+                        self.agent_pos = new_pos
+                elif event.key == pygame.K_DOWN:
+                    new_pos = (self.agent_pos[0], self.agent_pos[1] + 1)
+                    if new_pos[1] < GRID_HEIGHT and not maze[new_pos[1]][new_pos[0]]:
+                        self.agent_pos = new_pos
+                elif event.key == pygame.K_LEFT:
+                    new_pos = (self.agent_pos[0] - 1, self.agent_pos[1])
+                    if new_pos[0] >= 0 and not maze[new_pos[1]][new_pos[0]]:
+                        self.agent_pos = new_pos
+                elif event.key == pygame.K_RIGHT:
+                    new_pos = (self.agent_pos[0] + 1, self.agent_pos[1])
+                    if new_pos[0] < GRID_WIDTH and not maze[new_pos[1]][new_pos[0]]:
+                        self.agent_pos = new_pos
 
-# Draw the agent on the screen
-def draw_agent():
-    pygame.draw.circle(screen, config.YELLOW, config.AGENT_POS, 20)
+    def draw(self):
+        # Draw the grid
+        self.screen.fill(BLACK)
+        for y in range(GRID_HEIGHT):
+            for x in range(GRID_WIDTH):
+                rect = pygame.Rect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+                pygame.draw.rect(self.screen, WHITE, rect, 1)
+                if maze[y][x] == 1:
+                    pygame.draw.rect(self.screen, WHITE, rect)
+                if self.agent_pos[0] == x and self.agent_pos[1] == y:
+                    if self.agent_pos[0] < 0 or self.agent_pos[0] >= GRID_WIDTH or \
+                            self.agent_pos[1] < 0 or self.agent_pos[1] >= GRID_HEIGHT:
+                        continue
+                    pygame.draw.circle(self.screen, YELLOW, rect.center, GRID_SIZE // 2)
+                if GOAL_POS[0] == x and GOAL_POS[1] == y:
+                    if GOAL_POS[0] < 0 or GOAL_POS[0] >= GRID_WIDTH or \
+                            GOAL_POS[1] < 0 or GOAL_POS[1] >= GRID_HEIGHT:
+                        continue
+                    pygame.draw.circle(self.screen, BLUE, rect.center, GRID_SIZE // 2)
+                if (x, y) == GOAL_POS and (x, y) == self.agent_pos:
+                    text = font.render('Bazingga!', True, PURPLE)
+                    text_rect = text.get_rect(center=self.screen.get_rect().center)
+                    self.screen.blit(text, text_rect)
 
-# Draw the goal on the screen
-def draw_goal():
-    pygame.draw.circle(screen, config.BLUE, config.GOAL_POS, 20)
+        # Update the screen
+        pygame.display.flip()
 
-# Draw the movable locations on the screen
-def draw_movable_locations():
-    for y in range(40, SCREEN_HEIGHT, 40):
-        for x in range(40, SCREEN_WIDTH, 40):
-            rect = pygame.Rect(x-2, y-2, 4, 4)
-            if rect.collidelist(config.WALL_LIST) == -1:
-                pygame.draw.rect(screen, config.PURPLE, rect)
+    def loop(self):
+        while self.running:
+            self.handle_events()
+            self.draw()
 
-# Move the agent
-def move_agent(keys):
-    if keys[pygame.K_LEFT] and config.AGENT_POS[0] > 0:
-        config.AGENT_POS[0] -= 5
-    elif keys[pygame.K_RIGHT] and config.AGENT_POS[0] < SCREEN_WIDTH:
-        config.AGENT_POS[0] += 5
-    elif keys[pygame.K_UP] and config.AGENT_POS[1] > 0:
-        config.AGENT_POS[1] -= 5
-    elif keys[pygame.K_DOWN] and config.AGENT_POS[1] < SCREEN_HEIGHT:
-        config.AGENT_POS[1] += 5
-
-# Check for collisions between the agent and walls
-def check_wall_collisions(keys):
-    agent_rect = pygame.Rect(config.AGENT_POS[0]-20, config.AGENT_POS[1]-20, 40, 40)
-    for wall in config.WALL_LIST:
-        wall_rect = pygame.Rect(wall)
-        if check_collisions(agent_rect, wall_rect):
-            if keys[pygame.K_LEFT]:
-                config.AGENT_POS[0] += 5
-            elif keys[pygame.K_RIGHT]:
-                config.AGENT_POS[0] -= 5
-            elif keys[pygame.K_UP]:
-                config.AGENT_POS[1] += 5
-            elif keys[pygame.K_DOWN]:
-                config.AGENT_POS[1] -= 5
-
-# Game loop
-def game_loop():
-    # Set the background color
-    screen.fill(config.BLACK)
-
-    # Draw the movable locations on the screen (first)
-    draw_movable_locations()
-
-    # Draw the walls on the screen
-    draw_walls()
-
-    # Draw the agent on the screen
-    draw_agent()
-
-    # Draw the goal on the screen
-    draw_goal()
-
-    # Move the agent when arrow keys are pressed
-    keys = pygame.key.get_pressed()
-    move_agent(keys)
-
-    # Check for collisions between the agent and walls
-    check_wall_collisions(keys)
-
-    # Check for collisions between the agent and goal
-    goal_rect = pygame.Rect(config.GOAL_POS[0]-20, config.GOAL_POS[1]-20, 40, 40)
-    agent_rect = pygame.Rect(config.AGENT_POS[0]-20, config.AGENT_POS[1]-20, 40, 40)
-    if check_collisions(agent_rect, goal_rect):
-        # Display the win message
-        win_text = font.render("You Win!", True, config.BLUE)
-        win_rect = win_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
-        screen.blit(win_text, win_rect)
-
-    # Update the screen
-    pygame.display.flip()
-
-    # Set the frame rate
-    clock.tick(60)
+        # Quit pygame
+        pygame.quit()

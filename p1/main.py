@@ -1,18 +1,5 @@
-import pygame
-import game_logic
+from game_logic import Game
 
-# Initialize pygame
-pygame.init()
-
-# Game loop
-done = False
-while not done:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-
-    # Run the game loop
-    game_logic.game_loop()
-
-# Quit the game
-pygame.quit()
+if __name__ == '__main__':
+    game = Game()
+    game.loop()

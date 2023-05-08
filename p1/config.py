@@ -1,35 +1,34 @@
-# Define colors
-WHITE = (255, 255, 255)
+# Define the maze layout
+maze = [[0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 1, 1, 0],
+        [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0]]
+
+# Define the grid size and the window size
+GRID_SIZE = 50
+GRID_WIDTH = len(maze[0])
+GRID_HEIGHT = len(maze)
+WIDTH, HEIGHT = GRID_WIDTH * GRID_SIZE, GRID_HEIGHT * GRID_SIZE
+
+# Define the colors
 BLACK = (0, 0, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
+WHITE = (255, 255, 255)
 PURPLE = (128, 0, 128)
+YELLOW = (255, 255, 0)
+BLUE = (0, 0, 255)
 
+# Define the agent starting position
+AGENT_POS = (0, 0)
 
-# Define the agent and goal positions
-AGENT_POS = [50, 50]
-GOAL_POS = [700, 500]
+# Define the goal position
+GOAL_POS = (GRID_WIDTH-1, GRID_HEIGHT-1)
 
-# Define the wall positions and dimensions
-'''
-WALL_LIST = [
-    [300, 100, 200, 20],
-    [200, 300, 20, 200],
-    [500, 300, 20, 200],
-    [100, 500, 600, 20]
-]
-'''
-WALL_LIST = [
-    [0, 0, 20, 600],
-    [0, 0, 800, 20],
-    [0, 580, 800, 20],
-    [780, 0, 20, 600],
-    [100, 100, 20, 400],
-    [100, 100, 200, 20],
-    [100, 480, 200, 20],
-    [300, 100, 20, 200],
-    [300, 300, 200, 20],
-    [500, 100, 20, 200],
-    [500, 300, 200, 20],
-    [600, 100, 20, 400]
-]
+# Define the font
+FONT = 'Comic Sans MS'
+FONT_SIZE = 50
