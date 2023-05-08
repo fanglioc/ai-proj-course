@@ -1,12 +1,12 @@
 import pygame
 from config import *
+from path_planning import astar
 
 # Initialize pygame
 pygame.init()
 
 # Define the font
 font = pygame.font.SysFont(FONT, FONT_SIZE)
-
 
 class Game:
     def __init__(self):
@@ -44,6 +44,16 @@ class Game:
                     if new_pos[0] < GRID_WIDTH and not maze[new_pos[1]][new_pos[0]]:
                         self.agent_pos = new_pos
 
+    # Add this method to the Game class
+    def draw_path(self, path):
+        if path is not None:
+            for i in range(len(path) - 1):
+                x1, y1 = path[i]
+                x2, y2 = path[i + 1]
+                rect1 = pygame.Rect(x1 * GRID_SIZE, y1 * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+                rect2 = pygame.Rect(x2 * GRID_SIZE, y2 * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+                pygame.draw.line(self.screen, PURPLE, rect1.center, rect2.center, 10)
+
     def draw(self):
         # Draw the grid
         self.screen.fill(BLACK)
@@ -53,27 +63,35 @@ class Game:
                 pygame.draw.rect(self.screen, WHITE, rect, 1)
                 if maze[y][x] == 1:
                     pygame.draw.rect(self.screen, WHITE, rect)
-                if self.agent_pos[0] == x and self.agent_pos[1] == y:
-                    if self.agent_pos[0] < 0 or self.agent_pos[0] >= GRID_WIDTH or \
-                            self.agent_pos[1] < 0 or self.agent_pos[1] >= GRID_HEIGHT:
-                        continue
-                    pygame.draw.circle(self.screen, YELLOW, rect.center, GRID_SIZE // 2)
                 if GOAL_POS[0] == x and GOAL_POS[1] == y:
                     if GOAL_POS[0] < 0 or GOAL_POS[0] >= GRID_WIDTH or \
                             GOAL_POS[1] < 0 or GOAL_POS[1] >= GRID_HEIGHT:
                         continue
                     pygame.draw.circle(self.screen, BLUE, rect.center, GRID_SIZE // 2)
-                if (x, y) == GOAL_POS and (x, y) == self.agent_pos:
-                    text = font.render('Bazingga!', True, PURPLE)
-                    text_rect = text.get_rect(center=self.screen.get_rect().center)
-                    self.screen.blit(text, text_rect)
+
+        # Find the path from the agent to the goal grid
+        path = astar(maze, self.agent_pos, GOAL_POS)
+
+        # Draw the path
+        self.draw_path(path)
+
+        # Draw the agent
+        agent_rect = pygame.Rect(self.agent_pos[0] * GRID_SIZE, self.agent_pos[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+        if self.agent_pos[0] < 0 or self.agent_pos[0] >= GRID_WIDTH or \
+                self.agent_pos[1] < 0 or self.agent_pos[1] >= GRID_HEIGHT:
+            pass
+        else:
+            pygame.draw.circle(self.screen, YELLOW, agent_rect.center, GRID_SIZE // 2)
 
         # Update the screen
         pygame.display.flip()
 
-    def loop(self):
+    def run(self):
         while self.running:
+            # Handle events
             self.handle_events()
+
+            # Draw the game
             self.draw()
 
         # Quit pygame
