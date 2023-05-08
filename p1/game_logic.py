@@ -80,6 +80,9 @@ def game_loop():
     # Set the background color
     screen.fill(config.BLACK)
 
+    # Draw the movable locations on the screen (first)
+    draw_movable_locations()
+
     # Draw the walls on the screen
     draw_walls()
 
@@ -88,9 +91,6 @@ def game_loop():
 
     # Draw the goal on the screen
     draw_goal()
-
-    # Draw the movable locations on the screen
-    draw_movable_locations()
 
     # Move the agent when arrow keys are pressed
     keys = pygame.key.get_pressed()
