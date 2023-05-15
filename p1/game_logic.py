@@ -20,6 +20,9 @@ class Game:
         # Define the game loop
         self.running = True
 
+        # Define the path
+        self.path = None
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -27,24 +30,23 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-                elif event.key == pygame.K_UP:
-                    new_pos = (self.agent_pos[0], self.agent_pos[1] - 1)
-                    if new_pos[1] >= 0 and not maze[new_pos[1]][new_pos[0]]:
-                        self.agent_pos = new_pos
-                elif event.key == pygame.K_DOWN:
-                    new_pos = (self.agent_pos[0], self.agent_pos[1] + 1)
-                    if new_pos[1] < GRID_HEIGHT and not maze[new_pos[1]][new_pos[0]]:
-                        self.agent_pos = new_pos
-                elif event.key == pygame.K_LEFT:
-                    new_pos = (self.agent_pos[0] - 1, self.agent_pos[1])
-                    if new_pos[0] >= 0 and not maze[new_pos[1]][new_pos[0]]:
-                        self.agent_pos = new_pos
-                elif event.key == pygame.K_RIGHT:
-                    new_pos = (self.agent_pos[0] + 1, self.agent_pos[1])
-                    if new_pos[0] < GRID_WIDTH and not maze[new_pos[1]][new_pos[0]]:
-                        self.agent_pos = new_pos
 
-    # Add this method to the Game class
+        # If there is a path, move the agent along it
+        if self.path is not None and len(self.path) > 1:
+            next_pos = self.path[1]
+            if next_pos[0] < self.agent_pos[0]:
+                new_pos = (self.agent_pos[0] - 1, self.agent_pos[1])
+            elif next_pos[0] > self.agent_pos[0]:
+                new_pos = (self.agent_pos[0] + 1, self.agent_pos[1])
+            elif next_pos[1] < self.agent_pos[1]:
+                new_pos = (self.agent_pos[0], self.agent_pos[1] - 1)
+            elif next_pos[1] > self.agent_pos[1]:
+                new_pos = (self.agent_pos[0], self.agent_pos[1] + 1)
+
+            if not maze[new_pos[1]][new_pos[0]]:
+                self.agent_pos = new_pos
+                self.path.pop(0)
+
     def draw_path(self, path):
         if path is not None:
             for i in range(len(path) - 1):
@@ -70,10 +72,10 @@ class Game:
                     pygame.draw.circle(self.screen, BLUE, rect.center, GRID_SIZE // 2)
 
         # Find the path from the agent to the goal grid
-        path = astar(maze, self.agent_pos, GOAL_POS)
+        self.path = astar(maze, self.agent_pos, GOAL_POS)
 
         # Draw the path
-        self.draw_path(path)
+        self.draw_path(self.path)
 
         # Draw the agent
         agent_rect = pygame.Rect(self.agent_pos[0] * GRID_SIZE, self.agent_pos[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE)
@@ -85,6 +87,7 @@ class Game:
 
         # Update the screen
         pygame.display.flip()
+        pygame.display.update()
 
     def run(self):
         while self.running:
